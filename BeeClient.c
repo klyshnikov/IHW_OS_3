@@ -7,8 +7,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#define N 1
-#define H 1
+#define N 5
+#define H 10
 #define BEE_WORKING_TIME 5
 #define RCVBUFSIZE 32   /* Size of receive buffer */
 
@@ -34,8 +34,8 @@ void* bee(void* args) {
         sem_wait(&mutex);
         puts(echoString);
         send(sock, echoString, echoStringLen, 0);
-        sleep(rand() % BEE_WORKING_TIME);
         sem_post(&mutex);
+        sleep(rand() % BEE_WORKING_TIME);
     }
 }
 
