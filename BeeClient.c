@@ -5,6 +5,7 @@
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
 #include <pthread.h>
+#include <semaphore.h>
 
 #define N 1
 #define H 1
@@ -18,6 +19,7 @@ char *servIP;                    /* Server IP address (dotted quad) */
 char *echoString;                /* String to send to echo server */
 char echoBuffer[RCVBUFSIZE];     /* Buffer for echo string */
 unsigned int echoStringLen;      /* Length of string to echo */
+sem_t mutex;
 int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
                                         and total bytes read */
 
@@ -29,14 +31,17 @@ void DieWithError(char *errorMessage)
 
 void* bee(void* args) {
     while (1) {
+        sem_wait(&mutex);
         puts(echoString);
         send(sock, echoString, echoStringLen, 0);
         sleep(rand() % BEE_WORKING_TIME);
+        sem_post(&mutex);
     }
 }
 
 int main(int argc, char *argv[])
 {
+    sem_init(&mutex, 0, 1);
     if ((argc < 3) || (argc > 4))    /* Test for correct number of arguments */
     {
        fprintf(stderr, "Usage: %s <Server IP> <Echo Word> [<Echo Port>]\n",

@@ -26,7 +26,7 @@ void HandleTCPClient(int clntSocket)
     /* Receive message from client */
     if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0)
         DieWithError("recv() failed");
-    puts(echoBuffer);
+    printf("%d", count);
 
     if (echoBuffer[0] == 'b') {
         // Bee
@@ -43,7 +43,6 @@ void HandleTCPClient(int clntSocket)
                 DieWithError("send() failed");
         }
     }
-
     //close(clntSocket);
 }
 
