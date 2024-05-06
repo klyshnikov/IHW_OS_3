@@ -31,9 +31,7 @@ void* bear(void* args) {
     while (1) {
         if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
             DieWithError("recv() failed or connection closed prematurely");
-        if (echoBuffer[0] == 'y') {
-            printf("Winnie Pooh eat honey");
-        }
+        puts("Winnie Pooh eat honey");
         sleep(1);
     }
 }

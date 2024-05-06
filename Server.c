@@ -18,7 +18,7 @@ void DieWithError(char *errorMessage)
     exit(1);
 }
 
-void HandleTCPClient(int clntSocket)
+void HandleTCPClient(int clntSocket, int bearSocket)
 {
     char echoBuffer[RCVBUFSIZE];        /* Buffer for echo string */
     int recvMsgSize;                    /* Size of received message */
@@ -28,32 +28,23 @@ void HandleTCPClient(int clntSocket)
         DieWithError("recv() failed");
     printf("%d", count);
 
-    if (echoBuffer[0] == 'b') {
-        // Bee
-        ++count;
-    } else {
-        // Winnie Pooh
-        if (count >= H) {
-            // Будим
-            if (send(clntSocket, "yes", 3, 0) != recvMsgSize)
-                DieWithError("send() failed");
-            count = 0;
-        } else {
-            if (send(clntSocket, "no", 3, 0) != recvMsgSize)
-                DieWithError("send() failed");
-        }
+    ++count;
+    if (count > H) {
+        send(bearSocket, "yes", 3, 0);
+        count = 0;
     }
-    //close(clntSocket);
 }
 
 int main(int argc, char *argv[])
 {
     int servSock;                    /* Socket descriptor for server */
     int clntSock;                    /* Socket descriptor for client */
+    int bearSock;
     struct sockaddr_in echoServAddr; /* Local address */
     struct sockaddr_in echoClntAddr;
     unsigned short echoServPort;     /* Server port */
     unsigned int clntLen;            /* Length of client address data structure */
+    unsigned int bearLen;
 
     if (argc != 2)     /* Test for correct number of arguments */
     {
@@ -87,6 +78,10 @@ int main(int argc, char *argv[])
                            &clntLen)) < 0)
         DieWithError("accept() failed");
 
+    if ((bearSock = accept(servSock, (struct sockaddr *) &echoClntAddr,
+                           &bearLen)) < 0)
+        DieWithError("accept() failed");
+
     while (1) /* Run forever */
     {
         /* Set the size of the in-out parameter */
@@ -97,7 +92,7 @@ int main(int argc, char *argv[])
 
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
-        HandleTCPClient(clntSock);
+        HandleTCPClient(clntSock, bearSock);
     }
     /* NOT REACHED */
 }
