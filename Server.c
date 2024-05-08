@@ -26,7 +26,7 @@ void HandleTCPClient(int clntSocket, int bearSocket)
     /* Receive message from client */
     if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0)
         DieWithError("recv() failed");
-    printf("%d", count);
+    //printf("%d", count);
 
     ++count;
     if (count > H) {

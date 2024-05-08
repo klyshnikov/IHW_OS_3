@@ -32,7 +32,7 @@ void DieWithError(char *errorMessage)
 void* bee(void* args) {
     while (1) {
         sem_wait(&mutex);
-        puts(echoString);
+        puts("Bee put a drop of honey in a barrel");
         send(sock, echoString, echoStringLen, 0);
         sem_post(&mutex);
         sleep(rand() % BEE_WORKING_TIME);
