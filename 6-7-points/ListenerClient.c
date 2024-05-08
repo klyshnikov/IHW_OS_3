@@ -26,11 +26,15 @@ void DieWithError(char *errorMessage)
     exit(1);
 }
 
-void* bear(void* args) {
+void* listener(void* args) {
     while (1) {
         if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
             DieWithError("recv() failed or connection closed prematurely");
-        puts("Winnie Pooh wake up and eat honey");
+        if (echoBuffer[0] == 'b') {
+            puts("Bee put a drop of honey in a barrel");
+        } else {
+            puts("Winnie Pooh wake up and eat honey");
+        }
         sleep(1);
     }
 }
@@ -66,10 +70,10 @@ int main(int argc, char *argv[])
     echoStringLen = strlen(echoString);
 
 
-    pthread_t bear_thread;
-    int bear_id = 0;
-    pthread_create(&bear_thread, NULL, bear, &bear_id);
-    pthread_join(bear_thread, NULL);
+    pthread_t listener_thread;
+    int listener_id = 0;
+    pthread_create(&listener_thread, NULL, listener, &listener_id);
+    pthread_join(listener_thread, NULL);
 
     printf("\n");
 

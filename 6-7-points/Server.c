@@ -17,7 +17,7 @@ void DieWithError(char *errorMessage)
     exit(1);
 }
 
-void HandleTCPClient(int clntSocket, int bearSocket)
+void HandleTCPClient(int clntSocket, int bearSocket, int listenerSocket)
 {
     char echoBuffer[RCVBUFSIZE];
     int recvMsgSize;
@@ -27,7 +27,11 @@ void HandleTCPClient(int clntSocket, int bearSocket)
     //printf("%d", count);
 
     ++count;
+    // Sent to listener
+    send(listenerSocket, "bee", 3, 0);
     if (count > H) {
+        // Sent to listener
+        send(listenerSocket, "winnie", 6, 0);
         send(bearSocket, "yes", 3, 0);
         count = 0;
     }
@@ -38,11 +42,14 @@ int main(int argc, char *argv[])
     int servSock;
     int clntSock;
     int bearSock;
+    int listenerSock;
     struct sockaddr_in echoServAddr;
     struct sockaddr_in echoClntAddr;
+    struct sockaddr_in echoListenerAddr;
     unsigned short echoServPort;
     unsigned int clntLen;
     unsigned int bearLen;
+    unsigned int listenerLen;
 
     if (argc != 2)
     {
@@ -76,13 +83,17 @@ int main(int argc, char *argv[])
                            &bearLen)) < 0)
         DieWithError("accept() failed");
 
+    if ((listenerSock = accept(servSock, (struct sockaddr *) &echoListenerAddr,
+                           &listenerLen)) < 0)
+        DieWithError("accept() failed");
+
     while (1)
     {
         clntLen = sizeof(echoClntAddr);
 
         printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
-        HandleTCPClient(clntSock, bearSock);
+        HandleTCPClient(clntSock, bearSock, listenerSock);
     }
 }
 
