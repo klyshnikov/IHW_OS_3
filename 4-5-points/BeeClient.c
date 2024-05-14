@@ -1,27 +1,26 @@
-#include <stdio.h>      /* for printf() and fprintf() */
-#include <sys/socket.h> /* for socket(), connect(), send(), and recv() */
-#include <arpa/inet.h>  /* for sockaddr_in and inet_addr() */
-#include <stdlib.h>     /* for atoi() and exit() */
-#include <string.h>     /* for memset() */
-#include <unistd.h>     /* for close() */
+#include <stdio.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
 
 #define N 5
 #define H 10
 #define BEE_WORKING_TIME 5
-#define RCVBUFSIZE 32   /* Size of receive buffer */
+#define RCVBUFSIZE 32
 
-int sock;                        /* Socket descriptor */
-struct sockaddr_in echoServAddr; /* Echo server address */
-unsigned short echoServPort;     /* Echo server port */
-char *servIP;                    /* Server IP address (dotted quad) */
-char *echoString;                /* String to send to echo server */
-char echoBuffer[RCVBUFSIZE];     /* Buffer for echo string */
-unsigned int echoStringLen;      /* Length of string to echo */
+int sock;
+struct sockaddr_in echoServAddr;
+unsigned short echoServPort;
+char *servIP;
+char *echoString;
+char echoBuffer[RCVBUFSIZE];
+unsigned int echoStringLen;
 sem_t mutex;
-int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv()
-                                        and total bytes read */
+int bytesRcvd, totalBytesRcvd;
 
 void DieWithError(char *errorMessage)
 {
@@ -42,38 +41,35 @@ void* bee(void* args) {
 int main(int argc, char *argv[])
 {
     sem_init(&mutex, 0, 1);
-    if ((argc < 3) || (argc > 4))    /* Test for correct number of arguments */
+    if ((argc < 3) || (argc > 4))
     {
        fprintf(stderr, "Usage: %s <Server IP> <Echo Word> [<Echo Port>]\n",
                argv[0]);
        exit(1);
     }
 
-    servIP = argv[1];             /* First arg: server IP address (dotted quad) */
-    echoString = argv[2];         /* Second arg: string to echo */
+    servIP = argv[1];
+    echoString = argv[2];
 
     if (argc == 4)
-        echoServPort = atoi(argv[3]); /* Use given port, if any */
+        echoServPort = atoi(argv[3]);
     else
-        echoServPort = 7;  /* 7 is the well-known port for the echo service */
+        echoServPort = 7;
 
 
-    /* Create a reliable, stream socket using TCP */
     if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
 
-    /* Construct the server address structure */
-    memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
-    echoServAddr.sin_family      = AF_INET;             /* Internet address family */
-    echoServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
-    echoServAddr.sin_port        = htons(echoServPort); /* Server port */
+    memset(&echoServAddr, 0, sizeof(echoServAddr));
+    echoServAddr.sin_family      = AF_INET;
+    echoServAddr.sin_addr.s_addr = inet_addr(servIP);
+    echoServAddr.sin_port        = htons(echoServPort);
 
 
-    /* Establish the connection to the echo server */
     if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         DieWithError("connect() failed");
 
-    echoStringLen = strlen(echoString);          /* Determine input length */
+    echoStringLen = strlen(echoString);
 
     // Init bees
     pthread_t bees[N];
@@ -86,7 +82,7 @@ int main(int argc, char *argv[])
         pthread_join(bees[i], NULL);
     }
 
-    printf("\n");    /* Print a final linefeed */
+    printf("\n");
 
     close(sock);
     exit(0);
