@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include "general.h"
+
 #define N 5
 #define H 10
 #define BEE_WORKING_TIME 5
@@ -28,15 +30,18 @@ void DieWithError(char *errorMessage)
 
 void* bear(void* args) {
     while (1) {
+        sem_wait(&mutex);
         if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
             DieWithError("recv() failed or connection closed prematurely");
         puts("Winnie Pooh wake up and eat honey");
+        sem_post(&mutex);
         sleep(1);
     }
 }
 
 int main(int argc, char *argv[])
 {
+    sem_init(&mutex, 0, 1);
     if ((argc < 3) || (argc > 4))
     {
         fprintf(stderr, "Usage: %s <Server IP> <Echo Word> [<Echo Port>]\n",

@@ -7,6 +7,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+#include "general.h"
+
 #define N 5
 #define H 10
 #define BEE_WORKING_TIME 5
@@ -19,7 +21,7 @@ char *servIP;
 char *echoString;
 char echoBuffer[RCVBUFSIZE];
 unsigned int echoStringLen;
-sem_t mutex;
+
 int bytesRcvd, totalBytesRcvd;
 
 void DieWithError(char *errorMessage)
